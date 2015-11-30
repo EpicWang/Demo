@@ -22,6 +22,9 @@ import com.example.demo.fragment.RecyclerViewFragment;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * 将本项目保存到github
+ */
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
     private Map<String, Fragment> fragments;
