@@ -75,6 +75,7 @@ public class HowOldFragment extends Fragment implements View.OnClickListener {
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
+
         if (requestCode == RES_CODE) {
 
             if (data != null) {
@@ -93,19 +94,19 @@ public class HowOldFragment extends Fragment implements View.OnClickListener {
                 Log.i("TAG", readPictureDegree(mCurrentImageStr) + "");
                 mBitMap = Bitmap.createBitmap(mBitMap, 0, 0, mBitMap.getWidth(), mBitMap.getHeight(), matrix, true);
                 mImageView.setImageBitmap(mBitMap);
-                mShowText.setText("Click Detect");
+                mShowText.setText("点击检测");
             }
         } else if (requestCode == RES_CAREMA) {
-
-            if(filePath!=null){
+            if (filePath != null) {
                 mCurrentImageStr = filePath;
                 resizePhoto();
                 Matrix matrix = new Matrix();
-                matrix.postRotate(readPictureDegree(mCurrentImageStr));
-                Log.i("TAG", readPictureDegree(mCurrentImageStr) + "");
+                int rotia = readPictureDegree(mCurrentImageStr);
+                matrix.postRotate(90);
+                Log.i("TAG", "选择角度：" + rotia + "");
                 mBitMap = Bitmap.createBitmap(mBitMap, 0, 0, mBitMap.getWidth(), mBitMap.getHeight(), matrix, true);
                 mImageView.setImageBitmap(mBitMap);
-                mShowText.setText("Click Detect");
+                mShowText.setText("点击检测");
             }
         }
     }
@@ -203,30 +204,44 @@ public class HowOldFragment extends Fragment implements View.OnClickListener {
                 break;
             case R.id.id_takephoto:
 
-                Intent intentCarema = new Intent();
-                intentCarema.setAction(MediaStore.ACTION_IMAGE_CAPTURE);
-                intentCarema.addCategory(Intent.CATEGORY_DEFAULT);
-
-
-                if (FileUtils.isExternalStorageWritable()) {
-                    filePath = Environment.getExternalStorageDirectory() + "/" + new SimpleDateFormat("yyyyMMddHHmmsss").format(new Date()) + ".jpg";
-                }
-
-                File file = new File(filePath);
-                if (file.exists()) {
-                    file.delete();
-                }
-                Log.i("TAG", "filepath ---> " + filePath);
-                Uri uri = Uri.fromFile(file);
-
-                intentCarema.putExtra(MediaStore.EXTRA_OUTPUT, uri);
-
-                startActivityForResult(intentCarema, RES_CAREMA);
-
+                //startSysCamera();
+                startMyCamera();
                 break;
         }
 
     }
+
+    private void startMyCamera() {
+        Intent intentCarema = new Intent();
+        intentCarema.setClass(getContext(), HowOldActivity.class);
+        intentCarema.putExtra(MediaStore.EXTRA_OUTPUT, getPicUri());
+        intentCarema.putExtra("filePath", filePath);//保存图片路径
+        startActivityForResult(intentCarema, RES_CAREMA);
+
+    }
+
+    private void startSysCamera() {
+        Intent intentCarema = new Intent();
+        intentCarema.setAction(MediaStore.ACTION_IMAGE_CAPTURE);
+        intentCarema.addCategory(Intent.CATEGORY_DEFAULT);
+        Uri uri = getPicUri();
+        intentCarema.putExtra(MediaStore.EXTRA_OUTPUT, uri);
+        startActivityForResult(intentCarema, RES_CAREMA);
+    }
+
+    private Uri getPicUri() {
+        if (FileUtils.isExternalStorageWritable()) {
+            filePath = Environment.getExternalStorageDirectory() + "/" + new SimpleDateFormat("yyyyMMddHHmmsss").format(new Date()) + ".jpg";
+        }
+        File file = new File(filePath);
+        if (file.exists()) {
+            file.delete();
+        }
+        Log.i("TAG", "filepath ---> " + filePath);
+        Uri uri = Uri.fromFile(file);
+        return uri;
+    }
+
 
     private android.os.Handler handler = new android.os.Handler(new Handler.Callback() {
         @Override
@@ -241,7 +256,7 @@ public class HowOldFragment extends Fragment implements View.OnClickListener {
                 case RES_ERROR:
                     String error = (String) message.obj;
                     if (TextUtils.isEmpty(error)) {
-                        mShowText.setText("Error.");
+                        mShowText.setText("检测出错");
                     } else {
                         mShowText.setText(error);
                     }
@@ -267,7 +282,7 @@ public class HowOldFragment extends Fragment implements View.OnClickListener {
             jsonObject = new JSONObject(message);
             int responseCode = jsonObject.getInt("response_code");
             JSONArray jsonArray = jsonObject.getJSONArray("face");
-            mShowText.setText("find " + jsonArray.length() + " face");
+            mShowText.setText("共在图片中找到 " + jsonArray.length() + " 张脸");
             for (int i = 0; i < jsonArray.length(); i++) {
                 JSONObject obj = jsonArray.getJSONObject(i);//监测到的第一张脸
 

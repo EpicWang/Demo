@@ -9,7 +9,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true"
-        android:layout_marginRight="10dp"
+        android:layout_marginRight="20dp"
         android:text="检测"/>
 
     <Button
@@ -17,7 +17,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:layout_marginRight="10dp"
+        android:layout_marginRight="20dp"
         android:layout_toLeftOf="@+id/id_detect"
         android:text="选择"/>
     <Button
@@ -25,7 +25,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:layout_marginRight="10dp"
+        android:layout_marginRight="20dp"
         android:layout_toLeftOf="@+id/id_chose"
         android:text="拍照"/>
 
@@ -33,10 +33,9 @@
         android:id="@+id/id_face_info"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:gravity="center"
-        android:layout_alignTop="@+id/id_detect"
-        android:text="face"
+        android:layout_above="@+id/id_takephoto"
+        android:layout_centerHorizontal="true"
+        android:text="0 张脸"
         android:textSize="22sp"
         />
 
@@ -44,7 +43,7 @@
         android:id="@+id/id_imageview"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_above="@+id/id_detect"
+        android:layout_above="@+id/id_face_info"
         android:layout_alignParentRight="true"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
