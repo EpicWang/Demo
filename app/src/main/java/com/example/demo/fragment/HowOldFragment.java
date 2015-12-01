@@ -10,6 +10,7 @@ import android.graphics.Paint;
 import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.provider.MediaStore;
@@ -27,14 +28,18 @@ import android.widget.TextView;
 
 import com.example.demo.R;
 import com.example.demo.utils.DetectUtils;
+import com.example.demo.utils.FileUtils;
 import com.facepp.error.FaceppParseException;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 /**
  * Created by wangxiaolong on 2015-11-24 0024.
@@ -45,13 +50,14 @@ public class HowOldFragment extends Fragment implements View.OnClickListener {
     private static final int RES_CODE = 0x001;
     private static final int RES_SUCCESS = 0x002;
     private static final int RES_ERROR = 0x003;
-    private Button mDetect, mChose;
+    private static final int RES_CAREMA = 0x004;
+    private Button mDetect, mChose, mTakePhoto;
     private TextView mShowText;
     private View mProgressBar;
     private ImageView mImageView;
     private String mCurrentImageStr;
     private Bitmap mBitMap;
-
+    String filePath = null;
 
     @Nullable
     @Override
@@ -82,6 +88,18 @@ public class HowOldFragment extends Fragment implements View.OnClickListener {
                 }
                 resizePhoto();
                 //这里不知道什么情况，图片会自动旋转90°，所以先旋转一下
+                Matrix matrix = new Matrix();
+                matrix.postRotate(readPictureDegree(mCurrentImageStr));
+                Log.i("TAG", readPictureDegree(mCurrentImageStr) + "");
+                mBitMap = Bitmap.createBitmap(mBitMap, 0, 0, mBitMap.getWidth(), mBitMap.getHeight(), matrix, true);
+                mImageView.setImageBitmap(mBitMap);
+                mShowText.setText("Click Detect");
+            }
+        } else if (requestCode == RES_CAREMA) {
+
+            if(filePath!=null){
+                mCurrentImageStr = filePath;
+                resizePhoto();
                 Matrix matrix = new Matrix();
                 matrix.postRotate(readPictureDegree(mCurrentImageStr));
                 Log.i("TAG", readPictureDegree(mCurrentImageStr) + "");
@@ -144,12 +162,14 @@ public class HowOldFragment extends Fragment implements View.OnClickListener {
         mShowText = (TextView) relativeLayout.findViewById(R.id.id_face_info);
         mProgressBar = relativeLayout.findViewById(R.id.id_watting);
         mImageView = (ImageView) relativeLayout.findViewById(R.id.id_imageview);
+        mTakePhoto = (Button) relativeLayout.findViewById(R.id.id_takephoto);
         return relativeLayout;
     }
 
     private void initEvents() {
         mDetect.setOnClickListener(this);
         mChose.setOnClickListener(this);
+        mTakePhoto.setOnClickListener(this);
     }
 
     @Override
@@ -180,6 +200,29 @@ public class HowOldFragment extends Fragment implements View.OnClickListener {
                 Intent intent = new Intent(Intent.ACTION_PICK);
                 intent.setType("image/*");
                 startActivityForResult(intent, RES_CODE);
+                break;
+            case R.id.id_takephoto:
+
+                Intent intentCarema = new Intent();
+                intentCarema.setAction(MediaStore.ACTION_IMAGE_CAPTURE);
+                intentCarema.addCategory(Intent.CATEGORY_DEFAULT);
+
+
+                if (FileUtils.isExternalStorageWritable()) {
+                    filePath = Environment.getExternalStorageDirectory() + "/" + new SimpleDateFormat("yyyyMMddHHmmsss").format(new Date()) + ".jpg";
+                }
+
+                File file = new File(filePath);
+                if (file.exists()) {
+                    file.delete();
+                }
+                Log.i("TAG", "filepath ---> " + filePath);
+                Uri uri = Uri.fromFile(file);
+
+                intentCarema.putExtra(MediaStore.EXTRA_OUTPUT, uri);
+
+                startActivityForResult(intentCarema, RES_CAREMA);
+
                 break;
         }
 
@@ -259,10 +302,10 @@ public class HowOldFragment extends Fragment implements View.OnClickListener {
                 int ageHeight = ageBitmap.getHeight();
                 //设置气泡缩放比
                 if (bitmap.getWidth() < mImageView.getWidth() && bitmap.getHeight() < mImageView.getHeight()) {
-                    float ratio = Math.min(bitmap.getWidth()*1.0f / mImageView.getWidth(), bitmap.getHeight()*1.0f  / mImageView.getHeight());
+                    float ratio = Math.min(bitmap.getWidth() * 1.0f / mImageView.getWidth(), bitmap.getHeight() * 1.0f / mImageView.getHeight());
                     ageBitmap = Bitmap.createScaledBitmap(ageBitmap, (int) (ageWidth * ratio), (int) (ageHeight * ratio), false);
                 }
-                canvas.drawBitmap(ageBitmap,x-w/2,y-h/2-ageBitmap.getHeight(),null);
+                canvas.drawBitmap(ageBitmap, x - w / 2, y - h / 2 - ageBitmap.getHeight(), null);
                 //canvas.drawBitmap(ageBitmap, x, y, null);
                 //将原图显示
                 mBitMap = bitmap;
@@ -290,9 +333,9 @@ public class HowOldFragment extends Fragment implements View.OnClickListener {
             //            Drawable drawable= getResources().getDrawable(R.drawable.female);
             //            drawable.setBounds(0, 0, 100, 20);
             //            textView.setCompoundDrawables(drawable, null, null, null);
-           // textView.setCompoundDrawablesWithIntrinsicBounds(getResources().getDrawable(R.drawable.female), null, null, null);
+            // textView.setCompoundDrawablesWithIntrinsicBounds(getResources().getDrawable(R.drawable.female), null, null, null);
         }
-        textView.setText(msg+age);
+        textView.setText(msg + age);
         textView.setDrawingCacheEnabled(true);
         Bitmap bitmap = Bitmap.createBitmap(textView.getDrawingCache());
         textView.destroyDrawingCache();
