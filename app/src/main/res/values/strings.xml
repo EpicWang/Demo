@@ -9,4 +9,7 @@
     <string name="GridView">GridView</string>
     <string name="Hor_GridView">Hor_GridView</string>
     <string name="Straggered">Straggered</string>
+
+<!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

@@ -4,6 +4,7 @@ import android.graphics.ImageFormat;
 import android.hardware.Camera;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
@@ -112,13 +113,14 @@ public class HowOldActivity extends AppCompatActivity implements SurfaceHolder.C
 
         Camera.CameraInfo cameraInfo = new Camera.CameraInfo();
         cameraCount = Camera.getNumberOfCameras();
+        Log.i("TAG","共发现 "+cameraCount+" 个摄像头");
         for (int i = 0; i < cameraCount; i++) {
             Camera.getCameraInfo(i, cameraInfo);
             if (frontOrBack == CAMERA_FRONT && cameraInfo.facing == Camera.CameraInfo.CAMERA_FACING_FRONT) {
-                camera = Camera.open(i);
+                camera = Camera.open(Camera.CameraInfo.CAMERA_FACING_FRONT);
             }
             if (frontOrBack == CAMERA_BACK && cameraInfo.facing == Camera.CameraInfo.CAMERA_FACING_BACK) {
-                camera = Camera.open(i);
+                camera = Camera.open(Camera.CameraInfo.CAMERA_FACING_BACK);
             }
         }
 
